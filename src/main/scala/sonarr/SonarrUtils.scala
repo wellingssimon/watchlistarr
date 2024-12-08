@@ -24,7 +24,7 @@ trait SonarrUtils extends SonarrConversions {
         if (bypass) {
           EitherT.pure[IO, Throwable](List.empty[SonarrSeries])
         } else {
-          getToArr[List[SonarrSeries]](client)(baseUrl, apiKey, "importlistexclusion")
+          getToArr[List[SonarrSeries]](client)(baseUrl, apiKey, "importlistexclusion/paged", Map("pageSize" -> "-1"))
         }
     } yield (shows.map(toItem) ++ exclusions.map(toItem)).toSet
 
@@ -82,12 +82,16 @@ trait SonarrUtils extends SonarrConversions {
 
   private def getToArr[T: Decoder](
       client: HttpClient
-  )(baseUrl: Uri, apiKey: String, endpoint: String): EitherT[IO, Throwable, T] =
+  )(baseUrl: Uri, apiKey: String, endpoint: String, params: Map[String, Any] = Map.empty): EitherT[IO, Throwable, T] = {
+    val urlWithParams = params.foldLeft(baseUrl / "api" / "v3" / endpoint) {
+      case (url, (key, value)) => url.withQueryParam(key, value.toString)
+    }
     for {
-      response     <- EitherT(client.httpRequest(Method.GET, baseUrl / "api" / "v3" / endpoint, Some(apiKey)))
+      response     <- EitherT(client.httpRequest(Method.GET, urlWithParams, Some(apiKey)))
       maybeDecoded <- EitherT.pure[IO, Throwable](response.as[T])
       decoded <- EitherT.fromOption[IO](maybeDecoded.toOption, new Throwable("Unable to decode response from Sonarr"))
     } yield decoded
+  }
 
   private def postToArr[T: Decoder](
       client: HttpClient
