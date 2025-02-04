@@ -2,12 +2,11 @@ package radarr
 
 import cats.data.EitherT
 import cats.effect.IO
-import cats.implicits._
 import configuration.RadarrConfiguration
 import http.HttpClient
-import io.circe.{Decoder, Json}
 import io.circe.generic.auto._
 import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Json}
 import model.Item
 import org.http4s.{MalformedMessageBodyFailure, Method, Uri}
 import org.slf4j.LoggerFactory
@@ -15,6 +14,8 @@ import org.slf4j.LoggerFactory
 trait RadarrUtils extends RadarrConversions {
 
   private val logger = LoggerFactory.getLogger(getClass)
+
+  private var skipTagId: Int = -1
 
   protected def fetchMovies(
       client: HttpClient
@@ -65,14 +66,47 @@ trait RadarrUtils extends RadarrConversions {
       }
   }
 
+  private def getSkipTagId(client: HttpClient)(
+    apiKey: String,
+    baseUrl: Uri,
+    skipTag: String
+  ): EitherT[IO, Throwable, Int] = {
+    if (this.skipTagId >= 0) return EitherT.pure[IO, Throwable](this.skipTagId)
+    for {
+        allRadarrTags <- getToArr[List[RadarrTag]](client)(baseUrl, apiKey, "tag")
+        skipTagId = allRadarrTags.find(t => t.label == skipTag).get.id
+    } yield skipTagId
+  }
+
+  protected def hasSkipMovieTag(client: HttpClient)(
+    apiKey: String,
+    baseUrl: Uri,
+    skipTag: String,
+    tmdbId: Long
+  ): EitherT[IO, Throwable, Boolean] = {
+    for {
+      skipTagId <- this.getSkipTagId(client)(apiKey, baseUrl, skipTag)
+      movies <- getToArrWithParams[List[RadarrMovie]](client)(baseUrl, apiKey, "movie", Map("tmdbId" -> tmdbId.toString))
+    } yield movies.head.tags.contains(skipTagId)
+  }
+
   private def getToArr[T: Decoder](
       client: HttpClient
-  )(baseUrl: Uri, apiKey: String, endpoint: String): EitherT[IO, Throwable, T] =
+  )(baseUrl: Uri, apiKey: String, endpoint: String): EitherT[IO, Throwable, T] = getToArrWithParams(client)(baseUrl, apiKey, endpoint, null)
+
+  private def getToArrWithParams[T: Decoder](
+      client: HttpClient
+  )(baseUrl: Uri, apiKey: String, endpoint: String, params: Map[String, String]): EitherT[IO, Throwable, T] = {
+    var uri = baseUrl / "api" / "v3" / endpoint
+    if (params != null) {
+      params.foreachEntry((k, v) => uri = uri.withQueryParam(k, v))
+    }
     for {
-      response     <- EitherT(client.httpRequest(Method.GET, baseUrl / "api" / "v3" / endpoint, Some(apiKey)))
+      response     <- EitherT(client.httpRequest(Method.GET, uri, Some(apiKey)))
       maybeDecoded <- EitherT.pure[IO, Throwable](response.as[T])
       decoded <- EitherT.fromOption[IO](maybeDecoded.toOption, new Throwable("Unable to decode response from Radarr"))
     } yield decoded
+  }
 
   private def postToArr[T: Decoder](
       client: HttpClient

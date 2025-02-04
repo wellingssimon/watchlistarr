@@ -17,6 +17,7 @@ private[configuration] object Keys {
   val radarrRootFolder     = "radarr.rootFolder"
   val radarrBypassIgnored  = "radarr.bypassIgnored"
   val radarrTags           = "radarr.tags"
+  val radarrSkipTag        = "radarr.skipTag"
 
   val plexWatchlist1 = "plex.watchlist1"
   val plexWatchlist2 = "plex.watchlist2"
