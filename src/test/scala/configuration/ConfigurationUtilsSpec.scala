@@ -172,6 +172,7 @@ class ConfigurationUtilsSpec extends AnyFlatSpec with Matchers with MockFactory 
       sonarrRootFolder: Option[String] = None,
       radarrRootFolder: Option[String] = None,
       radarrApiKey: Option[String] = Some("radarr-api-key"),
+      radarrMinimumAvailability: Option[String] = Some("released"),
       plexWatchlist1: Option[String] = None,
       plexWatchlist2: Option[String] = None,
       plexToken: Option[String] = Some("test-token"),
@@ -190,6 +191,10 @@ class ConfigurationUtilsSpec extends AnyFlatSpec with Matchers with MockFactory 
     (mockConfigReader.getConfigOption _).expects(Keys.radarrBaseUrl).returning(unset).anyNumberOfTimes()
     (mockConfigReader.getConfigOption _).expects(Keys.radarrApiKey).returning(radarrApiKey).anyNumberOfTimes()
     (mockConfigReader.getConfigOption _).expects(Keys.radarrQualityProfile).returning(qualityProfile).anyNumberOfTimes()
+    (mockConfigReader.getConfigOption _)
+      .expects(Keys.radarrMinimumAvailability)
+      .returning(radarrMinimumAvailability)
+      .anyNumberOfTimes()
     (mockConfigReader.getConfigOption _).expects(Keys.radarrRootFolder).returning(radarrRootFolder).anyNumberOfTimes()
     (mockConfigReader.getConfigOption _).expects(Keys.radarrBypassIgnored).returning(unset).anyNumberOfTimes()
     (mockConfigReader.getConfigOption _).expects(Keys.plexWatchlist1).returning(plexWatchlist1).anyNumberOfTimes()

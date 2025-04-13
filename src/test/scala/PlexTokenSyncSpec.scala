@@ -46,6 +46,7 @@ class PlexTokenSyncSpec extends AnyFlatSpec with Matchers with MockFactory {
       radarrBaseUrl = Uri.unsafeFromString("https://localhost:7878"),
       radarrApiKey = "radarr-api-key",
       radarrQualityProfileId = 1,
+      radarrMinimumAvailability = "released",
       radarrRootFolder = "/root/",
       radarrBypassIgnored = false,
       radarrTagIds = Set(2)
@@ -166,6 +167,7 @@ class PlexTokenSyncSpec extends AnyFlatSpec with Matchers with MockFactory {
                        |  "title" : "Nowhere",
                        |  "tmdbId" : 1151534,
                        |  "qualityProfileId" : 1,
+                       |  "minimumAvailability": "released",
                        |  "rootFolderPath" : "/root/",
                        |  "addOptions" : {
                        |    "searchForMovie" : true
@@ -179,6 +181,7 @@ class PlexTokenSyncSpec extends AnyFlatSpec with Matchers with MockFactory {
         |  "title" : "The Twilight Saga: Breaking Dawn - Part 2",
         |  "tmdbId" : 1151534,
         |  "qualityProfileId" : 1,
+        |  "minimumAvailability": "released",
         |  "rootFolderPath" : "/root/",
         |  "addOptions" : {
         |    "searchForMovie" : true
@@ -192,6 +195,7 @@ class PlexTokenSyncSpec extends AnyFlatSpec with Matchers with MockFactory {
         |  "title" : "The Twilight Saga: Breaking Dawn - Part 1",
         |  "tmdbId" : 1151534,
         |  "qualityProfileId" : 1,
+        |  "minimumAvailability": "released",
         |  "rootFolderPath" : "/root/",
         |  "addOptions" : {
         |    "searchForMovie" : true
