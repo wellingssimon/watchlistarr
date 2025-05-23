@@ -10,11 +10,10 @@ import org.http4s.{Header, Method, Request, Uri}
 import org.typelevel.ci.CIString
 import com.github.blemale.scaffeine.{AsyncLoadingCache, Scaffeine}
 import org.slf4j.LoggerFactory
-
 import scala.concurrent.duration._
-import org.http4s.client.Client
+import org.http4s.client.Client // This import is fine, but the class signature will use FQN
 
-class HttpClient(httpClient: Client[IO]) {
+class HttpClient(httpClient: org.http4s.client.Client[IO]) {
 
   private val logger = LoggerFactory.getLogger(getClass)
 

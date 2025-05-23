@@ -11,11 +11,11 @@ import org.http4s.dsl.io._
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Server
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AsyncWordSpec
-import cats.effect.testing.scalatest.AsyncIOSpec // Ensure this is the correct one
+// import org.scalatest.wordspec.AsyncWordSpec // No longer needed
+import cats.effect.testing.scalatest.AsyncIOSpec
+import org.scalatest.matchers.should.Matchers // Ensure Matchers is imported and used
 
-class HttpClientSpec extends AsyncWordSpec with AsyncIOSpec with Matchers {
+class HttpClientSpec extends AsyncIOSpec with Matchers {
 
   // Define the service for the test server
   val testService: HttpRoutes[IO] = HttpRoutes.of[IO] {
@@ -57,13 +57,13 @@ class HttpClientSpec extends AsyncWordSpec with AsyncIOSpec with Matchers {
 
         resultsIO.asserting { results =>
           results.foreach { result =>
-            result shouldBe a[Right[_, _]]
+            result shouldBe a[Right[_, _]] // Uses Matchers
             result.foreach { json =>
-              json.hcursor.downField("message").as[String] shouldBe Right("Ok")
+              json.hcursor.downField("message").as[String] shouldBe Right("Ok") // Uses Matchers
             }
           }
-          results.length shouldBe numRequests
-          results.count(_.isRight) shouldBe numRequests
+          results.length shouldBe numRequests // Uses Matchers
+          results.count(_.isRight) shouldBe numRequests // Uses Matchers
         }
       }
     }
