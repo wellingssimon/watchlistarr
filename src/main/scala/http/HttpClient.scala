@@ -12,15 +12,11 @@ import com.github.blemale.scaffeine.{AsyncLoadingCache, Scaffeine}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
+import org.http4s.client.Client
 
-class HttpClient {
+class HttpClient(httpClient: Client[IO]) {
 
   private val logger = LoggerFactory.getLogger(getClass)
-
-  private val client = EmberClientBuilder
-    .default[IO]
-    .build
-    .map(FollowRedirect(5))
 
   private val cacheTtl = 5.seconds
 
@@ -66,7 +62,7 @@ class HttpClient {
 
     logger.debug(s"HTTP Request: ${requestWithPayload.toString()}")
 
-    val responseIO = client.use(_.expect[Json](requestWithPayload).attempt)
+    val responseIO = httpClient.expect[Json](requestWithPayload).attempt
 
     responseIO.map { response =>
       logger.debug(s"HTTP Response: $response")
