@@ -24,7 +24,7 @@ object Server extends IOApp {
     val httpClientResource = EmberClientBuilder.default[IO].build.map(FollowRedirect(5))
 
     httpClientResource.use { implicit resolvedHttpClient: Client[IO] =>
-      val appHttpClient = new HttpClient(resolvedHttpClient)
+      val appHttpClient = new http.HttpClient(resolvedHttpClient)
       for {
         initialConfig <- ConfigurationUtils.create(configReader, appHttpClient)
         configRef     <- Ref.of[IO, Configuration](initialConfig)
