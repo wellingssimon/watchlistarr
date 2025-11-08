@@ -71,7 +71,7 @@ trait PlexUtils {
     .map { token =>
       val containerSize = 300
       val url = Uri
-        .unsafeFromString("https://metadata.provider.plex.tv/library/sections/watchlist/all")
+        .unsafeFromString("https://discover.provider.plex.tv/library/sections/watchlist/all")
         .withQueryParam("X-Plex-Token", token)
         .withQueryParam("X-Plex-Container-Start", containerStart)
         .withQueryParam("X-Plex-Container-Size", containerSize)

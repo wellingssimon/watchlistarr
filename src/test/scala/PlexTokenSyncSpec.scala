@@ -70,7 +70,7 @@ class PlexTokenSyncSpec extends AnyFlatSpec with Matchers with MockFactory {
       .expects(
         Method.GET,
         Uri.unsafeFromString(
-          "https://metadata.provider.plex.tv/library/sections/watchlist/all?X-Plex-Token=plex-token&X-Plex-Container-Start=0&X-Plex-Container-Size=300"
+          "https://discover.provider.plex.tv/library/sections/watchlist/all?X-Plex-Token=plex-token&X-Plex-Container-Start=0&X-Plex-Container-Size=300"
         ),
         None,
         None
