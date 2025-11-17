@@ -61,6 +61,9 @@
 #  tags:
 #    - watchlistarr
 
+## Tag to use in Radarr to bypass movie deletion
+#  skipTag: "keep"
+
 
 #################################################################
 ## Plex Configuration

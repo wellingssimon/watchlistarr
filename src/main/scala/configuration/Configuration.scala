@@ -29,7 +29,8 @@ case class RadarrConfiguration(
     radarrQualityProfileId: Int,
     radarrRootFolder: String,
     radarrBypassIgnored: Boolean,
-    radarrTagIds: Set[Int]
+    radarrTagIds: Set[Int],
+    radarrSkipTag: String
 )
 
 case class PlexConfiguration(

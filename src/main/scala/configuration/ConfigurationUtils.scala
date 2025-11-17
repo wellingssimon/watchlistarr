@@ -34,7 +34,7 @@ object ConfigurationUtils {
       sonarrBypassIgnored    = configReader.getConfigOption(Keys.sonarrBypassIgnored).exists(_.toBoolean)
       sonarrSeasonMonitoring = configReader.getConfigOption(Keys.sonarrSeasonMonitoring).getOrElse("all")
       radarrConfig <- getRadarrConfig(configReader, client)
-      (radarrBaseUrl, radarrApiKey, radarrQualityProfileId, radarrRootFolder, radarrTagIds) = radarrConfig
+      (radarrBaseUrl, radarrApiKey, radarrQualityProfileId, radarrRootFolder, radarrTagIds, radarrSkipTag) = radarrConfig
       radarrBypassIgnored = configReader.getConfigOption(Keys.radarrBypassIgnored).exists(_.toBoolean)
       plexTokens          = getPlexTokens(configReader)
       skipFriendSync = configReader.getConfigOption(Keys.skipFriendSync).flatMap(_.toBooleanOption).getOrElse(false)
@@ -66,7 +66,8 @@ object ConfigurationUtils {
         radarrQualityProfileId,
         radarrRootFolder,
         radarrBypassIgnored,
-        radarrTagIds
+        radarrTagIds,
+        radarrSkipTag
       ),
       PlexConfiguration(
         plexWatchlistUrls,
@@ -159,8 +160,9 @@ object ConfigurationUtils {
   private def getRadarrConfig(
       configReader: ConfigurationReader,
       client: HttpClient
-  ): IO[(Uri, String, Int, String, Set[Int])] = {
+  ): IO[(Uri, String, Int, String, Set[Int], String)] = {
     val apiKey = configReader.getConfigOption(Keys.radarrApiKey).getOrElse(throwError("Unable to find radarr API key"))
+    val skipTag = configReader.getConfigOption(Keys.radarrSkipTag).orNull
     val configuredUrl = configReader.getConfigOption(Keys.radarrBaseUrl)
     val possibleUrls: Seq[String] =
       configuredUrl.map("http://" + _).toSeq ++ configuredUrl.toSeq ++ possibleLocalHosts.map(_ + ":7878")
@@ -187,7 +189,7 @@ object ConfigurationUtils {
         .getConfigOption(Keys.radarrTags)
         .map(getTagIdsFromConfig(client, url, apiKey))
         .getOrElse(IO.pure(Set.empty[Int]))
-    } yield (url, apiKey, qualityProfileId, rootFolder, tagIds)
+    } yield (url, apiKey, qualityProfileId, rootFolder, tagIds, skipTag)
   }
 
   private def getTagIdsFromConfig(client: HttpClient, url: Uri, apiKey: String)(tags: String): IO[Set[Int]] = {

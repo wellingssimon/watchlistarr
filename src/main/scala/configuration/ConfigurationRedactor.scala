@@ -22,6 +22,7 @@ object ConfigurationRedactor {
       |    radarrRootFolder: ${config.radarrConfiguration.radarrRootFolder}
       |    radarrBypassIgnored: ${config.radarrConfiguration.radarrBypassIgnored}
       |    radarrTagIds: ${config.radarrConfiguration.radarrTagIds.mkString(",")}
+      |    radarrSkipTag: ${config.radarrConfiguration.radarrSkipTag}
       |
       |  PlexConfiguration:
       |    plexWatchlistUrls: ${config.plexConfiguration.plexWatchlistUrls.mkString(", ")}

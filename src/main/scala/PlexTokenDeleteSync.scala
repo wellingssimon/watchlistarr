@@ -69,7 +69,30 @@ object PlexTokenDeleteSync extends PlexUtils with SonarrUtils with RadarrUtils {
 
   private def deleteMovie(client: HttpClient, config: Configuration)(movie: Item): EitherT[IO, Throwable, Unit] =
     if (config.deleteConfiguration.movieDeleting) {
-      deleteFromRadarr(client, config.radarrConfiguration, config.deleteConfiguration.deleteFiles)(movie)
+      val tmdbId = movie.getTmdbId.getOrElse {
+        logger.warn(s"Unable to extract Tmdb ID from movie to delete: $movie")
+        0L
+      }
+
+      for {
+        eitherShouldSkip <- hasSkipMovieTag(client)(
+          config.radarrConfiguration.radarrApiKey,
+          config.radarrConfiguration.radarrBaseUrl,
+          config.radarrConfiguration.radarrSkipTag,
+          tmdbId
+        ).attempt
+        _ <- eitherShouldSkip match {
+          case Left(error) =>
+            EitherT.liftF[IO, Throwable, Unit](IO(logger.error(s"Error in hasSkipMovieTag: ${error.getMessage}", error)))
+          case Right(shouldSkip) =>
+            if (shouldSkip) {
+              logger.info(s"Skipping deletion of movie [${movie}] due to Skip Tag [${config.radarrConfiguration.radarrSkipTag}]")
+              EitherT.pure[IO, Throwable](None)
+            } else {
+              deleteFromRadarr(client, config.radarrConfiguration, config.deleteConfiguration.deleteFiles)(movie)
+            }
+        }
+      } yield eitherShouldSkip
     } else {
       logger.info(s"Found movie \"${movie.title}\" which is not watchlisted on Plex")
       EitherT.pure[IO, Throwable](())

@@ -48,7 +48,8 @@ class PlexTokenSyncSpec extends AnyFlatSpec with Matchers with MockFactory {
       radarrQualityProfileId = 1,
       radarrRootFolder = "/root/",
       radarrBypassIgnored = false,
-      radarrTagIds = Set(2)
+      radarrTagIds = Set(2),
+      "keep"
     ),
     PlexConfiguration(
       plexWatchlistUrls = Set(),

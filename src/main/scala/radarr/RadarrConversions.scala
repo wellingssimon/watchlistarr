@@ -11,6 +11,6 @@ private[radarr] trait RadarrConversions {
   )
 
   def toItem(movie: RadarrMovieExclusion): Item = toItem(
-    RadarrMovie(movie.movieTitle, movie.imdbId, movie.tmdbId, movie.id)
+    RadarrMovie(movie.movieTitle, movie.imdbId, movie.tmdbId, movie.id, List.empty)
   )
 }
