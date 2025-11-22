@@ -5,15 +5,16 @@ WORKDIR /app
 COPY . .
 
 RUN sbt update compile stage
-RUN chmod a+rx /app/target/universal/stage/bin/*
 
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:21-alpine
 
 WORKDIR /app
+RUN apk add --no-cache bash
 
 COPY --from=build /app/target/universal/stage /app
 
-COPY --chmod=755 docker/entrypoint.sh /app/entrypoint.sh
-RUN sed -i 's/\r$//' /app/entrypoint.sh
+COPY docker/entrypoint.sh /app/entrypoint.sh
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+RUN chmod +x /app/entrypoint.sh && sed -i 's/\r$//' /app/entrypoint.sh
+
+ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
