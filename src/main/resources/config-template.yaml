@@ -2,10 +2,10 @@
 ## Uncomment the lines you would like to configure, then save this file and restart Watchlistarr
 
 #interval:
-## How often do you want Watchlistarr to pull the latest from Plex? In general, 10-30 seconds is okay.
+## How often do you want Watchlistarr to pull the latest from Plex? In general, 60-300 seconds is okay.
 ## If you're running this on a slower system (e.g. Raspberry Pi), you may want to increase this
 ## Note: If you do not have Plex Pass, this will be overridden to ~19 minute syncs, see README
-#  seconds: 10
+#  seconds: 120
 
 
 #################################################################

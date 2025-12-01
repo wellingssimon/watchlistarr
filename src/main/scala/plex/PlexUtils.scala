@@ -2,6 +2,7 @@ package plex
 
 import cats.data.EitherT
 import cats.effect.IO
+import cats.effect.implicits.parSequenceN
 import cats.implicits.toTraverseOps
 import configuration.PlexConfiguration
 import http.HttpClient
@@ -14,6 +15,8 @@ import io.circe.syntax.EncoderOps
 import org.http4s.client.UnexpectedStatus
 
 import java.util.UUID
+import scala.concurrent.duration.DurationInt
+import scala.util.Random
 
 trait PlexUtils {
 
@@ -23,10 +26,8 @@ trait PlexUtils {
     extras.Configuration.default.withDefaults
 
   protected def fetchWatchlistFromRss(client: HttpClient)(url: Uri): IO[Set[Item]] = {
-    val randomUUID = UUID.randomUUID().toString.take(12)
     val jsonFormatUrl = url
       .withQueryParam("format", "json")
-      .withQueryParam("cache_buster", randomUUID)
 
     client.httpRequest(Method.GET, jsonFormatUrl).map {
       case Left(UnexpectedStatus(s, _, _)) if s.code == 500 =>
@@ -69,7 +70,7 @@ trait PlexUtils {
       containerStart: Int = 0
   ): EitherT[IO, Throwable, Set[Item]] = config.plexTokens
     .map { token =>
-      val containerSize = 300
+      val containerSize = 100
       val url = Uri
         .unsafeFromString("https://discover.provider.plex.tv/library/sections/watchlist/all")
         .withQueryParam("X-Plex-Token", token)
@@ -82,7 +83,12 @@ trait PlexUtils {
         result         <- EitherT.liftF(toItems(config, client)(tokenWatchlist))
         nextPage <-
           if (tokenWatchlist.MediaContainer.totalSize > containerStart + containerSize)
-            getSelfWatchlist(config, client, containerStart + containerSize)
+            for {
+              // We should be considerate with the Plex servers
+              randomSeconds <- EitherT.liftF(IO(Random.nextInt(11)))
+              _             <- EitherT.liftF(IO.sleep(3.seconds + randomSeconds.seconds))
+              next          <- getSelfWatchlist(config, client, containerStart + containerSize)
+            } yield next
           else
             EitherT.pure[IO, Throwable](Set.empty[Item])
       } yield result ++ nextPage
@@ -178,7 +184,12 @@ trait PlexUtils {
         if (
           watchlist.data.user.watchlist.pageInfo.hasNextPage && watchlist.data.user.watchlist.pageInfo.endCursor.nonEmpty
         )
-          getWatchlistIdsForUser(config, client, token)(user, watchlist.data.user.watchlist.pageInfo.endCursor)
+          for {
+            // We should be considerate with the Plex servers
+            randomSeconds <- EitherT.liftF(IO(Random.nextInt(11)))
+            _             <- EitherT.liftF(IO.sleep(3.seconds + randomSeconds.seconds))
+            next <- getWatchlistIdsForUser(config, client, token)(user, watchlist.data.user.watchlist.pageInfo.endCursor)
+          } yield next
         else
           EitherT.pure[IO, Throwable](Set.empty[TokenWatchlistItem])
     } yield watchlist.data.user.watchlist.nodes.map(_.toTokenWatchlistItem).toSet ++ extraContent
