@@ -28,7 +28,7 @@ object ConfigurationUtils {
   def create(configReader: ConfigurationReader, client: HttpClient): IO[Configuration] = {
     val config = for {
       sonarrConfig <- getSonarrConfig(configReader, client)
-      refreshInterval = configReader.getConfigOption(Keys.intervalSeconds).flatMap(_.toIntOption).getOrElse(60).seconds
+      refreshInterval = configReader.getConfigOption(Keys.intervalSeconds).flatMap(_.toIntOption).getOrElse(120).seconds
       (sonarrBaseUrl, sonarrApiKey, sonarrQualityProfileId, sonarrRootFolder, sonarrLanguageProfileId, sonarrTagIds) =
         sonarrConfig
       sonarrBypassIgnored    = configReader.getConfigOption(Keys.sonarrBypassIgnored).exists(_.toBoolean)

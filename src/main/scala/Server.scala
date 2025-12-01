@@ -1,4 +1,5 @@
 import cats.effect._
+import cats.effect.std.Random
 import cats.implicits.catsSyntaxTuple4Parallel
 import configuration.{Configuration, ConfigurationUtils, FileAndSystemPropertyReader}
 import http.HttpClient
@@ -48,10 +49,12 @@ object Server extends IOApp {
       httpClient: HttpClient
   ): IO[Unit] =
     for {
-      config <- fetchLatestConfig(configRef)
-      _      <- PlexTokenSync.run(config, httpClient, runFullSync = false)
-      _      <- IO.sleep(config.refreshInterval)
-      _      <- plexRssSync(configRef, httpClient)
+      config       <- fetchLatestConfig(configRef)
+      _            <- PlexTokenSync.run(config, httpClient, runFullSync = false)
+      // We should be considerate with the Plex servers
+      randomMillis <- Random.scalaUtilRandom[IO].flatMap(_.nextLongBounded(3 * config.refreshInterval.toMillis))
+      _            <- IO.sleep(config.refreshInterval + randomMillis.millis)
+      _            <- plexRssSync(configRef, httpClient)
     } yield ()
 
   private def plexFullSync(
